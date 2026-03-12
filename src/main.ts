@@ -41,4 +41,3 @@ shopApi.getProducts().then((products) => {
 productsModel.setProducts(products);
 console.log('Товары с сервера:', productsModel.getAllProducts());
 });
-console.log('API_URL:', API_URL);
