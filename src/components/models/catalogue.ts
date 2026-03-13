@@ -16,11 +16,8 @@ export class Catalogue {
     return this._products;
   }
 
-  getProduct(id: string): IProduct {
+  getProduct(id: string): IProduct | undefined {
     const product = this._products.find((product) => product.id === id);
-    if (!product) {
-      throw new Error ('Товар не найден');
-    }
     return product;
   }
 

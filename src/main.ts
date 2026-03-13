@@ -10,7 +10,10 @@ import './scss/styles.scss';
 const productsModel = new Catalogue();
 productsModel.setProducts(apiProducts.items);
 console.log('Массив товаров из каталога:', productsModel.getAllProducts());
-console.log('Один товар по id:', productsModel.getProduct('854cef69-976d-4c2a-a18c-2aa45046c390'));
+let selectedProduct = productsModel.getProduct('854cef69-976d-4c2a-a18c-2aa45046c390');
+if (selectedProduct === undefined) {
+  throw new Error ('Товар не найден');
+} else console.log('Один товар по id:', selectedProduct);
 productsModel.setProductCard(apiProducts.items[0]);
 console.log('Выбрана карточка', productsModel.getProductCard());
 
@@ -37,7 +40,9 @@ console.log('Валидация (после очистки):', buyer1.dataValida
 
 const api = new Api(API_URL);
 const shopApi = new ShopApi(api);
-shopApi.getProducts().then((products) => {
+shopApi.getProducts()
+.then((products) => {
 productsModel.setProducts(products);
 console.log('Товары с сервера:', productsModel.getAllProducts());
-});
+})
+.catch((err) => console.log('Что-то пошло не так:', err));
