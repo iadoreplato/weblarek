@@ -129,7 +129,13 @@ events.on('buyer:data-changed', () => {
     const errors = buyer.dataValidation(buyer.getBuyerData());
     if (activeForm === 'order') {
         const isValid = !errors.payment && !errors.address;
-        orderForm.render({ valid: isValid, error: errors.payment ?? errors.address ?? '' });
+        const buyerData = buyer.getBuyerData();
+         orderForm.render({ 
+            valid: isValid, 
+            error: errors.payment ?? errors.address ?? '',
+            paymentMethod: buyerData.payment,
+            addressInput: buyerData.address
+        });
     }
     if (activeForm === 'contacts') {
         const isValid = !errors.email && !errors.phone;
