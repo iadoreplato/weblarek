@@ -272,21 +272,19 @@ image: string - изображение товара
 Дочерний класс карточки товара в каталоге. Содержит  элементы и методы, которые используются в карточках товара в каталоге товаров в модальном окне Preview
 
 Конструктор:
-`constructor(container: HTMLElement)` - принимает DOM-элемент клонированного темплейта
+`constructor(container: HTMLElement, events: IEvents)` - принимает DOM-элемент и брокер событий.
 
 Поля класса:  
 `protected categoryElement: HTMLElement` - защищенный HTML-элемент, содержащий категорию товара.
 `protected descriptionElement: HTMLElement` - защищенный HTML-элемент, содержащий описание товара.
 `protected imageElement: HTMLImageElement` - защищенный HTML-элемент, содержащий изображение товара.
 `protected buttonElement: HTMLButtonElement` - защищенный HTML-элемент, содержащий кнопку действия.
-`protected _clickHandler: () => void` - защищенное поле для хранения обработчика клика.
 
 Методы:  
 `set category(value: string)` - устанавливает текстовое содержимое categoryElement.
 `set description(value: string)` - устанавливает текстовое содержимое descriptionElement.
 `set image(value: string)` - устанавливает атрибут src элемента imageElement.
 `set buttonState(value: { text: string, disabled: boolean })` - устанавливает текст и состояние кнопки.
-`setOnClick(handler: () => void): void` - устанавливает обработчик клика на кнопку.
 
 
 ##### Интерфейс BasketProductCardData
@@ -485,11 +483,13 @@ interface GalleryData {
 #### События
 ##### События моделей данных
 `catalogue:products-changed` - генерируется при изменении списка товаров в каталоге
+`catalogue:card-changed` - генерируется при сохранении выбранного товара в модели
 `cart:changed` - генерируется при любом изменении списка товаров в корзине
 `buyer:data-changed` - генерируется при изменении или очистке данных покупателя
 
 ##### События представлений
 `card:selected` - генерируется при нажатии на карточку товара в каталоге
+`card:click` - генерируется при нажатии кнопки в карточке товара
 `cart:delete` - генерируется при нажатии кнопки удаления товара из корзины
 `cart:open` - генерируется при нажатии на иконку корзины в шапке
 `cart:purchase` - генерируется при нажатии кнопки "Оформить" в корзине

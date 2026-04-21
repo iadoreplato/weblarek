@@ -1,7 +1,9 @@
 import { Form } from './Form.ts'
 import { ensureElement } from '../../utils/utils.ts'
 import { IEvents } from '../base/Events.ts' 
-export class ContactForm extends Form {
+import { ContactData } from '../../types/index.ts';
+
+export class ContactForm extends Form<ContactData> {
   protected emailInputElement: HTMLInputElement;
   protected phoneInputElement: HTMLInputElement;
 

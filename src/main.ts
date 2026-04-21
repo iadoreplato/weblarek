@@ -33,7 +33,7 @@ shopApi.getProducts().then((products) => {
 const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'));
 const header = new Header(ensureElement<HTMLElement>('.header'), events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'));
-const cardPreview = new CardPreview(cloneTemplate('#card-preview')); 
+const cardPreview = new CardPreview(cloneTemplate('#card-preview'), events); 
 const cartView = new CartView(cloneTemplate('#basket'), events);
 const orderForm = new OrderForm(cloneTemplate('#order'), events);
 const contactForm = new ContactForm(cloneTemplate('#contacts'), events);
@@ -50,14 +50,12 @@ events.on('catalogue:products-changed', () => {
 });
 
 events.on('card:selected', (product: IProduct) => {
-    cardPreview.setOnClick(() => {
-        if (cart.isAvailable(product.id)) {
-            cart.deleteProduct(product)
-        } else {
-            cart.addProduct(product)
-        }
-        modal.close();
-    });
+    catalogue.setProductCard(product);
+});
+
+events.on('catalogue:card-changed', () => {
+    const product = catalogue.getProductCard();
+     if (!product) return;
     const isInCart = cart.isAvailable(product.id);
     modal.render({
         content: cardPreview.render({
@@ -69,9 +67,18 @@ events.on('card:selected', (product: IProduct) => {
         })
     });
     modal.open();
-});
+})
 
-
+events.on('card:click', () => {
+    const product = catalogue.getProductCard();
+    if (!product) return;
+    if (cart.isAvailable(product.id)) {
+        cart.deleteProduct(product)
+    } else {
+        cart.addProduct(product);
+    }
+    modal.close();
+})
 
 events.on('cart:delete', (data: { id: string }) => {
     const product = catalogue.getProduct(data.id);
@@ -99,17 +106,15 @@ events.on('cart:open', () => {
     modal.open();
 })
 
-let activeForm: 'order' | 'contacts' | null = null;
 
 events.on('cart:purchase', () => {
-    activeForm = 'order';
     const buyerData = buyer.getBuyerData();
     const errors = buyer.dataValidation(buyerData);
     const isValid = !errors.payment && !errors.address;
     modal.render({
         content: orderForm.render({ 
             valid: isValid, 
-            error: errors.payment ?? errors.address ?? '' ,
+            error: [errors.payment, errors.address].filter(Boolean).join(', '),
             addressInput: buyerData.address,
             paymentMethod: buyerData.payment
         })
@@ -127,30 +132,36 @@ events.on('contacts:changed', (data: Partial<IBuyer>) => {
 
 events.on('buyer:data-changed', () => {
     const errors = buyer.dataValidation(buyer.getBuyerData());
-    if (activeForm === 'order') {
-        const isValid = !errors.payment && !errors.address;
-        const buyerData = buyer.getBuyerData();
-         orderForm.render({ 
-            valid: isValid, 
-            error: errors.payment ?? errors.address ?? '',
-            paymentMethod: buyerData.payment,
-            addressInput: buyerData.address
-        });
-    }
-    if (activeForm === 'contacts') {
-        const isValid = !errors.email && !errors.phone;
-        contactForm.render({ valid: isValid, error: errors.email ?? errors.phone ?? '' });
-    }
+    const buyerData = buyer.getBuyerData();
+    
+    orderForm.render({ 
+        valid: !errors.payment && !errors.address, 
+        error: [errors.payment, errors.address].filter(Boolean).join(', '),
+        paymentMethod: buyerData.payment,
+        addressInput: buyerData.address
+    });
+    
+    contactForm.render({ 
+        valid: !errors.email && !errors.phone, 
+        error: [errors.email, errors.phone].filter(Boolean).join(', '),
+        email: buyerData.email,
+        phone: buyerData.phone
+    });
 });
 
 events.on('order:next', () => {
-    activeForm = 'contacts';
+    const errors = buyer.dataValidation(buyer.getBuyerData());
+    const buyerData = buyer.getBuyerData();
     modal.render({
-        content: contactForm.render({ valid: false, error: '' })
-    })
+        content: contactForm.render({ 
+            valid: !errors.email && !errors.phone,
+            error: [errors.email, errors.phone].filter(Boolean).join(', '),
+            email: buyerData.email,
+            phone: buyerData.phone
+        })
+    });
     modal.open();
 });
-
 
 events.on('order:pay', () => {
     const items = cart.getSelectedProducts().map(item => item.id);
